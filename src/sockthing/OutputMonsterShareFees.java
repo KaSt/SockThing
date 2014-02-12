@@ -29,7 +29,7 @@ public class OutputMonsterShareFees implements OutputMonster
             Address a = new Address(params,addr_str);
             pay_to.add(a);
         }
-        System.out.println("Pay to: " + pay_to);
+        System.out.println("Pay share fees to: " + pay_to);
 
 
     }

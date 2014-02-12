@@ -106,7 +106,7 @@ public class JobInfo
 
         params.put(job_id);
         params.put(HexUtil.swapBytesInsideWord(HexUtil.swapEndianHexString(block_template.getString("previousblockhash")))); //correct
-        params.put(Hex.encodeHexString(coinbase.getCoinbase1())); 
+        params.put(Hex.encodeHexString(coinbase.getCoinbase1()));
         params.put(Hex.encodeHexString(coinbase.getCoinbase2()));
         params.put(getMerkleRoots());
         params.put(protocol); //correct
@@ -125,7 +125,7 @@ public class JobInfo
         try
         {
             validateSubmitInternal(params, submit_result);
-     
+
 
         }
         catch(Throwable t)
@@ -147,7 +147,7 @@ public class JobInfo
             }
 
         }
-        
+
     }
 
     public void validateSubmitInternal(JSONArray params, SubmitResult submit_result)
@@ -201,10 +201,10 @@ public class JobInfo
         {
             coinbase.setExtranonce2(extranonce2);
             coinbase_hash = coinbase.genTx().getHash();
- 
+
 
             Sha256Hash merkle_root = new Sha256Hash(HexUtil.swapEndianHexString(coinbase_hash.toString()));
-        
+
             JSONArray branches = getMerkleRoots();
             for(int i=0; i<branches.length(); i++)
             {
@@ -227,8 +227,8 @@ public class JobInfo
                 String header_str = header.toString();
 
                 header_str = HexUtil.swapBytesInsideWord(header_str);
-                System.out.println("Header: " + header_str);
-                System.out.println("Header bytes: " + header_str.length());
+                //System.out.println("Header: " + header_str);
+                //System.out.println("Header bytes: " + header_str.length());
 
                 //header_str = HexUtil.swapWordHexString(header_str);
 
@@ -240,7 +240,7 @@ public class JobInfo
                 md.update(pass);
 
                 Sha256Hash blockhash = new Sha256Hash(HexUtil.swapEndianHexString(new Sha256Hash(md.digest()).toString()));
-                System.out.println("Found block hash: " + blockhash);
+                //System.out.println("Found block hash: " + blockhash);
                 submit_result.hash = blockhash;
 
                 if (blockhash.toString().compareTo(share_target.toString()) < 0)
@@ -263,7 +263,7 @@ public class JobInfo
                     submit_result.height = getHeight();
                 }
 
-                
+
 
             }
             catch(java.security.NoSuchAlgorithmException e)
@@ -278,7 +278,8 @@ public class JobInfo
     public String buildAndSubmitBlock(JSONArray params, Sha256Hash merkleRoot)
         throws org.json.JSONException, org.apache.commons.codec.DecoderException
     {
-        System.out.println("WE CAN BUILD A BLOCK.  WE HAVE THE TECHNOLOGY.");
+        System.out.println("Found a block.");
+        server.getEventLog().log("Found a block.");
 
         String user = params.getString(0);
         String job_id = params.getString(1);
@@ -308,13 +309,13 @@ public class JobInfo
                 throw new RuntimeException(e);
             }
         }
- 
+
 
 
 
         Block block = new Block(
-            network_params, 
-            2, 
+            network_params,
+            2,
             new Sha256Hash(block_template.getString("previousblockhash")),
             new Sha256Hash(HexUtil.swapEndianHexString(merkleRoot.toString())),
             time,
@@ -322,15 +323,15 @@ public class JobInfo
             nonce_l,
             lst);
 
-        System.out.println("Constructed block hash: " + block.getHash());
+        server.getEventLog().log("Constructed block hash: " + block.getHash());
 
 
         try
         {
             block.verifyTransactions();
-            System.out.println("Block VERIFIED");
+            server.getEventLog().log("Block VERIFIED");
             byte[] blockbytes = block.bitcoinSerialize();
-            System.out.println("Bytes: " + blockbytes.length);
+            server.getEventLog().log("Bytes: " + blockbytes.length);
 
             String ret =  server.submitBlock(block);
 
@@ -338,8 +339,8 @@ public class JobInfo
             {
                 coinbase.markRemark();
             }
-            
-            server.getEventLog().log("BLOCK SUBMITTED: "+ getHeight() + " " + block.getHash() );
+
+            server.getEventLog().log("Bblock submitted: "+ getHeight() + " " + block.getHash() );
 
             return ret;
 
@@ -351,7 +352,7 @@ public class JobInfo
             return "N";
         }
     }
-    
+
     public JSONArray getMerkleRoots()
         throws org.json.JSONException
     {
@@ -366,7 +367,7 @@ public class JobInfo
             Sha256Hash hash = new Sha256Hash(HexUtil.swapEndianHexString(tx.getString("hash")));
             hashes.add(hash);
         }
-        
+
         JSONArray roots = new JSONArray();
 
         while(hashes.size() > 0)
@@ -391,9 +392,9 @@ public class JobInfo
 
         return roots;
 
-    } 
+    }
 
 
 
-    
+
 }

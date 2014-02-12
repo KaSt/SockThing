@@ -400,12 +400,12 @@ public class StratumServer
                 {
                     if (last_success_time + MAX_TIME_WITHOUT_SUCCESS < System.currentTimeMillis())
                     {
-                        System.out.println("MAX_TIME_WITHOUT_SUCCESS EXCEEDED.  Giving up.  Failure.");
+                        server.getEventLog().log("MAX_TIME_WITHOUT_SUCCESS EXCEEDED.  Giving up.  Failure.");
                         System.exit(-1);
                     }
                     if (new_block_notify_object.tryAcquire(1, 1000, TimeUnit.MILLISECONDS))
                     {
-                        System.out.println("New block notify");
+                        server.getEventLog().log("New block notify");
                     }
                     doRun();
 
@@ -674,7 +674,7 @@ public class StratumServer
         {
             JSONObject result = bitcoin_rpc.submitBlock(blk);
 
-            System.out.println("Block result: " + result.toString(2));
+            server.getEventLog().log("Block result: " + result.toString(2));
 
             if (result.isNull("error") && result.isNull("result"))
             {
@@ -682,7 +682,7 @@ public class StratumServer
             }
             else
             {
-                System.out.println("Block submit error:  "+ result.get("error"));
+                server.getEventLog().log("Block submit error:  "+ result.get("error"));
                 return "N";
             }
 
