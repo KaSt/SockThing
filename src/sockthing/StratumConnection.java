@@ -154,7 +154,7 @@ public class StratumConnection
                         out.println(msg_str);
                         out.flush();
 
-                        System.out.println("Out: " + msg.toString());
+                        //System.out.println("Out: " + msg.toString());
                         updateLastNetworkAction();
                     }
 
@@ -196,7 +196,7 @@ public class StratumConnection
                     {
                         System.out.println(line);
 		        JSONObject msg = new JSONObject(line);
-                        System.out.println("In: " + msg.toString());
+                        //System.out.println("In: " + msg.toString());
                         processInMessage(msg);
                     }
 

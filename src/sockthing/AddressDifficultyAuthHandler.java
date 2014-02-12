@@ -9,10 +9,13 @@ public class AddressDifficultyAuthHandler implements AuthHandler
     protected StratumServer server;
 
     private int default_difficulty;
+    private EventLog event_log;
 
     public AddressDifficultyAuthHandler(StratumServer server)
     {
         this.server = server;
+
+        event_log = server.getEventLog();
 
         Config config = server.getConfig();
 
@@ -27,13 +30,19 @@ public class AddressDifficultyAuthHandler implements AuthHandler
                 System.out.println("Config default_difficulty " + diff + " invalid. Setting default difficulty to 32.");
             } else {
                 default_difficulty = diff;
-                System.out.println("Config default_difficulty found. Setting to " + diff);
+                getEventLog().log("Config default_difficulty found. Setting to " + diff);
             }
         } else {
             default_difficulty = 32;
-            System.out.println("Config default_difficulty not found. Setting default difficulty to 32.");
+            getEventLog().log("Config default_difficulty not found. Setting default difficulty to 32.");
         }
     }
+
+    public EventLog getEventLog()
+    {
+        return event_log;
+    }
+
 
     /**
      * Return PoolUser object if the user is legit.

@@ -1,9 +1,9 @@
-
 package sockthing;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+
 
 /**
  * Optional database of witty remarks to be injected into Coinbase transactions
@@ -16,11 +16,21 @@ public class WittyRemarks extends Thread
 
     private long last_check;
     private String last_remark;
+    private StratumServer server;
+    private EventLog event_log;
 
-    public WittyRemarks()
+    private EventLog getEventLog() {
+        return event_log;
+    }
+
+
+    public WittyRemarks(StratumServer server)
     {
         setDaemon(true);
         setName("WittyRemarks");
+
+        this.server = server;
+        this.event_log = server.getEventLog();
 
     }
 
@@ -60,7 +70,7 @@ public class WittyRemarks extends Thread
     private void updateLastRemark()
     {
         if (System.currentTimeMillis() > last_check + DB_CHECK_MS)
-        {  
+        {
             Connection conn = null;
             try
             {
@@ -74,24 +84,24 @@ public class WittyRemarks extends Thread
 
                     last_remark = rs.getString("remark");
                     int order = rs.getInt("order_id");
-                    System.out.println("Witty remark selected (" + order + ") - '" + last_remark + "'");
+                    getEventLog().log("Witty remark selected (" + order + ") - '" + last_remark + "'");
 
                 }
                 else
                 {
-                    System.out.println("No more witty remarks");
+                    getEventLog().log("No more witty remarks");
                     last_remark=null;
                 }
 
                 rs.close();
                 ps.close();
-            
-            
+
+
                 last_check=System.currentTimeMillis();
             }
             catch(java.sql.SQLException e)
             {
-                System.out.println("Error getting remark: " + e);    
+                getEventLog().log("Error getting remark: " + e);
             }
             finally
             {
@@ -118,7 +128,7 @@ public class WittyRemarks extends Thread
         }
         catch(java.sql.SQLException e)
         {
-            System.out.println("Failed to mark remark as no longer remarkable: " + e);
+            getEventLog().log("Failed to mark remark as no longer remarkable: " + e);
         }
         finally
         {

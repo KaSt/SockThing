@@ -28,7 +28,7 @@ public class StratumServer
     private long max_idle_time = 300L * 1000L * 1000L * 1000L;//5 minutes in nanos
     //private long max_idle_time = 3L * 1000L * 1000L * 1000L;//3 seconds
 
-    
+
     private Map<String, StratumConnection> conn_map=new HashMap<String, StratumConnection>(1024, 0.5f);
 
     private Config config;
@@ -47,7 +47,7 @@ public class StratumServer
      * Nothing should read this, anything interested should call getCurrentBlockTemplate() instead
      */
     private JSONObject cached_block_template;
-    
+
     private Map<String, UserSessionData> user_session_data_map=new HashMap<String, UserSessionData>(1024, 0.5f);
 
     private volatile int current_block;
@@ -59,7 +59,7 @@ public class StratumServer
 
     private volatile long block_reward;
     private StratumServer server;
-    
+
     private Object block_template_lock;
 
     public StratumServer(Config config)
@@ -79,7 +79,7 @@ public class StratumServer
     }
     public void start()
     {
-        getEventLog().log("SERVER START");
+        getEventLog().log("Server started");
 
         new TimeoutThread().start();
         new NewBlockThread().start();
@@ -255,9 +255,9 @@ public class StratumServer
         }
 
         public void run()
-        {   
+        {
             while(true)
-            {   
+            {
                 LinkedList<Map.Entry<String, StratumConnection> > lst= new LinkedList<Map.Entry<String, StratumConnection> >();
 
                 synchronized(conn_map)
@@ -276,12 +276,12 @@ public class StratumServer
                         {
                             conn_map.remove(me.getKey());
                         }
-                    }   
+                    }
                 }
 
                 try{Thread.sleep(30000);}catch(Throwable t){}
 
-                
+
 
             }
 
@@ -310,7 +310,7 @@ public class StratumServer
                     doRun();
                 }
                 catch(Throwable t)
-                {           
+                {
                     t.printStackTrace();
                 }
             }
@@ -371,7 +371,7 @@ public class StratumServer
         }
         return 2;
 
-        
+
     }
 
     public class NewBlockThread extends Thread
@@ -389,7 +389,7 @@ public class StratumServer
             setName("NewBlockThread");
             last_update_time=System.currentTimeMillis();
             last_success_time=System.currentTimeMillis();
-            
+
         }
 
         public void run()
@@ -472,7 +472,7 @@ public class StratumServer
 
             if (last_update_time + TEMPLATE_REFRESH_TIME < System.currentTimeMillis())
             {
-                
+
                 triggerUpdate(false);
                 last_update_time = System.currentTimeMillis();
                 last_success_time = System.currentTimeMillis();
@@ -498,7 +498,7 @@ public class StratumServer
     {
         block_reward =  getCurrentBlockTemplate().getLong("coinbasevalue");
     }
-    
+
     private void updateBlockDifficulty()
         throws Exception
     {
@@ -512,7 +512,7 @@ public class StratumServer
         throws Exception
     {
         getEventLog().log("Update triggered. Clean: " + clean);
-        System.out.println("Update triggered. Clean: " + clean);
+        //System.out.println("Update triggered. Clean: " + clean);
 
         cached_block_template = null;
 
@@ -542,7 +542,7 @@ public class StratumServer
             me.getValue().sendRealJob(block_template, clean);
 
         }
-        
+
         long t2_update_connection = System.currentTimeMillis();
         getEventLog().log("Update Complete");
 
@@ -568,7 +568,7 @@ public class StratumServer
         conf.require("coinbase_text");
         conf.require("saver_messaging_enabled");
         conf.require("witty_remarks_enabled");
-        
+
         StratumServer server = new StratumServer(conf);
 
         server.setEventLog(new EventLog(conf));
@@ -596,16 +596,16 @@ public class StratumServer
         {
             server.setNetworkParameters(NetworkParameters.testNet3());
         }
-        
+
         server.setOutputMonster(new OutputMonsterShareFees(conf, server.getNetworkParameters()));
 
         if (conf.getBoolean("witty_remarks_enabled"))
         {
-            server.setWittyRemarks(new WittyRemarks());
+            server.setWittyRemarks(new WittyRemarks(server));
         }
         //server.setPPLNSAgent(new PPLNSAgent(server));
 
-        new NotifyListenerUDP(server).start();        
+        new NotifyListenerUDP(server).start();
         server.start();
     }
 
@@ -624,17 +624,16 @@ public class StratumServer
             JSONObject post;
 	    String blockTemplate = bitcoin_rpc.getSimplePostRequest("getblocktemplate");
             post = new JSONObject(blockTemplate);
-	   
+
            JSONObject  rpcResult = bitcoin_rpc.sendPost(post);
-           
-	  try { 
-          	 if (rpcResult.getString("result") == "281996")  {
-			getEventLog().log("Bitcoind is still downloading blocks..."); 
-			return null;
-		 }
+
+	  try {
+               if (rpcResult.getString("result") == "281996")  {
+			     getEventLog().log("Bitcoind is still downloading blocks...");
+                    return null;
+               }
 	   }  catch (Exception e) { }
 
-           getEventLog().log("Sending rpc request for Result object");
 	    c =  rpcResult.getJSONObject("result");
 
             cached_block_template=c;
@@ -679,7 +678,7 @@ public class StratumServer
 
             if (result.isNull("error") && result.isNull("result"))
             {
-                return "Y"; 
+                return "Y";
             }
             else
             {
@@ -693,7 +692,7 @@ public class StratumServer
             t.printStackTrace();
             return "N";
         }
-        
+
     }
 
     public UserSessionData getUserSessionData(PoolUser pu)

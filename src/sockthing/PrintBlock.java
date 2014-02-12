@@ -49,7 +49,7 @@ public class PrintBlock
         blk = new Block(NetworkParameters.prodNet(), buff);
 
         in.close();
-        System.out.println("Got block : " + hash + " from s3");
+        //System.out.println("Got block : " + hash + " from s3");
 
         return blk;
         }
