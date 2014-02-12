@@ -187,14 +187,15 @@ public class StratumConnection
             {
                 Scanner scan = new Scanner(sock.getInputStream());
 
-                while(open)
+                while(scan.hasNextLine())
                 {
                     String line = scan.nextLine();
                     updateLastNetworkAction();
                     line = line.trim();
                     if (line.length() > 0)
                     {
-                        JSONObject msg = new JSONObject(line);
+                        System.out.println(line);
+		        JSONObject msg = new JSONObject(line);
                         System.out.println("In: " + msg.toString());
                         processInMessage(msg);
                     }
@@ -261,23 +262,19 @@ public class StratumConnection
             reply.put("id", id);
             if (pu==null)
             {
-                reply.put("error", "unknown user");
-                reply.put("result", false);
-                sendMessage(reply);
+                reply.put("error", "unknown user - adding new user");
+		pu = new PoolUser(username);
             }
-            else
-            {
-                reply.put("result", true);
-                reply.put("error", JSONObject.NULL);
-                //reply.put("difficulty", pu.getDifficulty());
-                //reply.put("user", pu.getName());
-                user = pu;
-                sendMessage(reply);
-                sendDifficulty();
-                sendGetClient();
-                user_session_data = server.getUserSessionData(pu);
-                sendRealJob(server.getCurrentBlockTemplate(),false);
-            }
+            reply.put("result", true);
+            reply.put("error", JSONObject.NULL);
+            //reply.put("difficulty", pu.getDifficulty());
+            //reply.put("user", pu.getName());
+            user = pu;
+            sendMessage(reply);
+            sendDifficulty();
+            sendGetClient();
+            user_session_data = server.getUserSessionData(pu);
+            sendRealJob(server.getCurrentBlockTemplate(),false);
             
         }
         else if (method.equals("mining.resume"))

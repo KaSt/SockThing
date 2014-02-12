@@ -616,8 +616,20 @@ public class StratumServer
             if (c != null) return c;
 
             JSONObject post;
-            post = new JSONObject(bitcoin_rpc.getSimplePostRequest("getblocktemplate"));
-            c = bitcoin_rpc.sendPost(post).getJSONObject("result");
+	    String blockTemplate = bitcoin_rpc.getSimplePostRequest("getblocktemplate");
+            post = new JSONObject(blockTemplate);
+	   
+           JSONObject  rpcResult = bitcoin_rpc.sendPost(post);
+           
+	  try { 
+          	 if (rpcResult.getString("result") == "281996")  {
+			getEventLog().log("Bitcoind is still downloading blocks..."); 
+			return null;
+		 }
+	   }  catch (Exception e) { }
+
+           getEventLog().log("Sending rpc request for Result object");
+	    c =  rpcResult.getJSONObject("result");
 
             cached_block_template=c;
 
