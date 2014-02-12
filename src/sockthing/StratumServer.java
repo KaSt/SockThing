@@ -424,7 +424,13 @@ public class StratumServer
 
             JSONObject reply = bitcoin_rpc.doSimplePostRequest("getblockcount");
 
-            int block_height = reply.getInt("result");
+            int block_height=0;
+	    try {
+	    		block_height = reply.getInt("result");
+	    } catch (Exception e) {
+					getEventLog().log("result is not of type int. Contents of reply msg: "+reply);
+					return;
+		}
 
             if (block_height != last_block)
             {
